@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, Image } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { _TIME } from '../utils/utils';
 
-export default function Music() {
-//  const playbackObject = new Audio.Sound();
+import isEmputImage from '../images/is_empty_image.png';
 
+export default function Music() {
   const [playbackInstance, setPlaybackInstance] = useState<Audio.Sound>();
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus>();
   const [shouldPlay, setShouldPlay] = useState(false);
@@ -16,7 +16,7 @@ export default function Music() {
   useEffect(() => {
     Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
-      staysActiveInBackground: false,
+      staysActiveInBackground: true,
       interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
       playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
@@ -101,23 +101,27 @@ export default function Music() {
 
   return (
     <View style={styles.container}>
-      <RectButton style={styles.containerButton} onPress={play}>
-        <Text>Play</Text>
-      </RectButton>
+      <Image source={isEmputImage} style={styles.image} />
 
-      <Text>{timer}</Text>
+      <View>
+        <RectButton style={styles.containerButton} onPress={play}>
+          <Text>Play</Text>
+        </RectButton>
 
-      <RectButton style={styles.containerButton} onPress={pause}>
-        <Text>Pause</Text>
-      </RectButton>
+        <Text>{timer}</Text>
 
-      <RectButton style={styles.containerButton} onPress={replay}>
-        <Text>Replay</Text>
-      </RectButton>
+        <RectButton style={styles.containerButton} onPress={pause}>
+          <Text>Pause</Text>
+        </RectButton>
 
-      <RectButton style={styles.containerButton} onPress={stop}>
-        <Text>Stop</Text>
-      </RectButton>
+        <RectButton style={styles.containerButton} onPress={replay}>
+          <Text>Replay</Text>
+        </RectButton>
+
+        <RectButton style={styles.containerButton} onPress={stop}>
+          <Text>Stop</Text>
+        </RectButton>
+      </View>
     </View>
   );
 }
@@ -125,9 +129,8 @@ export default function Music() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
   },
+
   containerButton: {
     height: 38,
     width: 64,
@@ -135,5 +138,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 6,
     backgroundColor: '#ddd',
-  }
+  },
+
+  image: {
+    height: '60%',
+    width: '100%',
+    resizeMode: 'cover',
+    opacity: 0.75,
+  },
 });

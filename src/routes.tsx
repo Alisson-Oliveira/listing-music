@@ -15,7 +15,7 @@ export default function Routes() {
       <Navigator screenOptions={{ 
         headerShown: false,
         cardStyle: {
-          backgroundColor: '#f2f3f5',
+          backgroundColor: '#2E2E2C',
         }
       }}>
         <Screen 
@@ -23,10 +23,17 @@ export default function Routes() {
           component={Painel} 
           options={{
             headerShown: true,
-            header: () => <Header title="Listing Music"/>
+            header: () => <Header showButtons={true} />
           }}
         />
-        <Screen name="Music" component={Music} />
+        <Screen 
+          name="Music"
+          component={Music} 
+          options={{
+            headerShown: true,
+            header: () => <Header showButtons={false} />
+          }}
+        />
       </Navigator>
     </NavigationContainer>
   );

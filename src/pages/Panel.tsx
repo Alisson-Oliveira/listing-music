@@ -1,8 +1,9 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
 
-import { StyleSheet, Text, View, Image } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { RectButton, ScrollView, TextInput } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 
 export default function Panel() {
   const navigation = useNavigation();
@@ -12,60 +13,45 @@ export default function Panel() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
       
-      <TextInput 
-        style={styles.search}
-        placeholder="Song Artist Genre"
-      />
-
-      <View style={styles.containerScroll}>
-        <Text style={styles.titleFolders}>Your folders</Text>
-        <ScrollView>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-          <RectButton style={styles.containerMusic} onPress={handleToMusic}>
-            <View style={styles.image}></View>
-            <Text style={styles.title}>Rock</Text>
-          </RectButton>
-        </ScrollView>
+      <View style={styles.containerSearch}>
+        <Feather name='search' size={24} color='#FFFFFF' />
+        <TextInput
+          style={styles.search} 
+          placeholder='Song Artist Genre'
+          placeholderTextColor='#FFFFFF'
+        />
       </View>
 
-    </View>
+      <View style={styles.containerFolders}>
+        <Text style={styles.titleFolders}>Your folders</Text>
+        <RectButton style={styles.containerMusic} onPress={handleToMusic}>
+          <View style={styles.image}>
+            <Feather name="folder" size={54} color='#FFFFFF'/>
+          </View>
+          <Text style={styles.title}>Rock</Text>
+        </RectButton>
+        <RectButton style={styles.containerMusic} onPress={handleToMusic}>
+          <View style={styles.image}>
+            <Feather name="folder" size={54} color='#FFFFFF'/>
+          </View>
+          <Text style={styles.title}>Sertanejo</Text>
+        </RectButton>
+        <RectButton style={styles.containerMusic} onPress={handleToMusic}>
+          <View style={styles.image}>
+            <Feather name="folder" size={54} color='#FFFFFF'/>
+          </View>
+          <Text style={styles.title}>Pop</Text>
+        </RectButton>
+        <RectButton style={styles.containerMusic} onPress={handleToMusic}>
+          <View style={styles.image}>
+            <Feather name="folder" size={54} color='#FFFFFF'/>
+          </View>
+          <Text style={styles.title}>Eletrônica</Text>
+        </RectButton>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -73,29 +59,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
-  search: {
+  
+  containerSearch: {
+    marginTop: 24,
+    marginHorizontal: 12,
+    marginBottom: 6,
     height: 52,
-    margin: 12,
-
-    borderLeftWidth: 1,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
     borderRadius: 12,
-    borderColor: '#8fa7b3',
-
     padding: 12,
-
-    justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
-    backgroundColor: '#f2f3f5'
+    color: '#FFFFFF',
+    backgroundColor: '#555353',
+    elevation: 5,
   },
 
-  containerScroll: {
+  search: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginLeft: 12,
+    marginRight: 24,
+  },
+
+  containerFolders: {
     marginLeft: 12,
     marginRight: 12,
+    marginBottom: 12,
+  },
+
+  titleFolders: {
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    fontSize: 24,
+    marginTop: 12,
+    marginBottom: 12,
   },
 
   containerMusic: {
@@ -104,35 +101,23 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
-    backgroundColor: '#f2f3f5'
   },
   
   image: {
-    height: 64,
-    width: 64,
-
+    height: 84,
+    width: 84,
     marginLeft: 12,
     marginRight: 12,
-    
-    borderLeftWidth: 1,
-    borderTopWidth: 1,
-    borderRightWidth: 1,
-    borderBottomWidth: 1,
-    borderRadius: 6,
-    
-    backgroundColor: '#dddddd',
-    borderColor: '#8fa7b3',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#555353',
+    elevation: 2,
   },
 
   title: {
     fontWeight: '600',
+    color: '#FFFFFF',
     fontSize: 18,
   },
-
-  titleFolders: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    marginTop: 12,
-    marginBottom: 12,
-  }
 });
