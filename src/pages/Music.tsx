@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Audio, AVPlaybackStatus } from 'expo-av';
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { _TIME } from '../utils/utils';
+import { _TIME, _COUNTER } from '../utils/utils';
+import { POINTER, POINTER_FULL } from '../utils/pointer';
+
+import { Feather } from '@expo/vector-icons';
 
 import isEmputImage from '../images/is_empty_image.png';
 
@@ -11,14 +14,19 @@ export default function Music() {
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus>();
   const [shouldPlay, setShouldPlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timer, setTimer] = useState('00:00:00');
 
+  const [cursor, setCursor] = useState(0);
+  const [pointer, setPointer] = useState(0);
+  const [pointerFull, setPointerFull] = useState(0);
+
+  const [timer, setTimer] = useState('00:00:00');
+  const [fullTimer, setFullTimer] = useState('00:00:00');
+  
   useEffect(() => {
+    setPointer(Dimensions.get('window').width - 6)
+
     Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
       staysActiveInBackground: true,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-      playsInSilentModeIOS: true,
       shouldDuckAndroid: true,
       interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
       playThroughEarpieceAndroid: false
@@ -49,8 +57,18 @@ export default function Music() {
       setShouldPlay(status.shouldPlay);
       setIsPlaying(status.isPlaying);
 
+      if (status.durationMillis) {
+        const responsePointer = POINTER(status.durationMillis);
+        const responsePointerFull = POINTER_FULL(responsePointer);
+
+        setFullTimer(responsePointer);
+        setPointerFull(responsePointerFull);
+      }
+
       const timerConvert = _TIME(status.positionMillis);
-      
+      const updateCursor = POINTER_FULL(timerConvert); 
+
+      setCursor(updateCursor);
       setTimer(timerConvert);
     } else {
       if (status.error) {
@@ -59,11 +77,7 @@ export default function Music() {
     }
   };
 
-  async function play() {
-    newMusic(true);
-  } 
-
-  async function pause() {  
+  async function onPlayPause() {  
     try {
       if (playbackInstance) {
         if (isPlaying) {
@@ -73,26 +87,22 @@ export default function Music() {
           setIsPlaying(true);
           await playbackInstance.playAsync();
         }
+      } else {
+        newMusic(true);
       }
     } catch (error) {
-      // An error occurred!
+      console.log(`FATAL PLAYER ERROR: ${error}`);
     }
   }
-
-  async function replay() {
-    try {
-      if (playbackInstance) {
-        await playbackInstance.replayAsync();
-      }
-    } catch (error) {
-      // An error occurred!
-    }
-  } 
 
   async function stop() {
     try {
       if (playbackInstance) {
         await playbackInstance.unloadAsync();
+        setPlaybackInstance(undefined);
+        setFullTimer('00:00:00');
+        setTimer('00:00:00');
+        setIsPlaying(false);
       }
     } catch (error) {
       // An error occurred!
@@ -101,26 +111,37 @@ export default function Music() {
 
   return (
     <View style={styles.container}>
-      <Image source={isEmputImage} style={styles.image} />
-
-      <View>
-        <RectButton style={styles.containerButton} onPress={play}>
-          <Text>Play</Text>
-        </RectButton>
-
-        <Text>{timer}</Text>
-
-        <RectButton style={styles.containerButton} onPress={pause}>
-          <Text>Pause</Text>
-        </RectButton>
-
-        <RectButton style={styles.containerButton} onPress={replay}>
-          <Text>Replay</Text>
-        </RectButton>
-
-        <RectButton style={styles.containerButton} onPress={stop}>
-          <Text>Stop</Text>
-        </RectButton>
+      <View style={styles.containerMusic}>
+        <Image source={isEmputImage} style={styles.image}/>
+        <View style={styles.containerCounter}>
+          <View style={[styles.pointer, { 
+            left: -6 + (pointer / pointerFull) * cursor
+          }]}/>
+          <View style={styles.counter}/>
+        </View>
+      </View>
+      <View style={styles.containerOptions}>
+        <View style={styles.containerTimer}>
+          <Text style={styles.time}>{timer}</Text>
+          <Text style={styles.time}>{fullTimer}</Text>
+        </View>
+        <View style={styles.containerButtons}>
+          <RectButton style={styles.buttons}>
+            <Feather name="skip-back" size={28} color="#FFFFFF"/>
+          </RectButton>
+          <RectButton style={[styles.buttons, styles.center]} onPress={onPlayPause}>
+            {
+              !isPlaying ? (
+                <Feather name="play" size={38} color="#FFFFFF"/>
+              ) : (
+                <Feather name="pause" size={38} color="#FFFFFF"/>
+              )
+            }
+          </RectButton>
+          <RectButton style={styles.buttons} onPress={stop}>
+            <Feather name="skip-forward" size={28} color="#FFFFFF"/>
+          </RectButton>
+        </View>
       </View>
     </View>
   );
@@ -129,21 +150,81 @@ export default function Music() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
-  containerButton: {
-    height: 38,
-    width: 64,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 6,
-    backgroundColor: '#ddd',
+  containerMusic: {
+    width: '100%',
   },
 
   image: {
-    height: '60%',
+    height: 390,
     width: '100%',
     resizeMode: 'cover',
     opacity: 0.75,
+  },
+
+  containerCounter: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  pointer: {
+    width: 12,    
+    height: 12,
+    zIndex: 1,
+    marginBottom: -8,
+    borderRadius: 100,
+    position: 'absolute',
+    backgroundColor: '#FFFFFF',
+  },
+
+  counter: {
+    width: '100%',
+    borderBottomWidth: 4,
+    borderColor: '#555353',
+  },
+
+  containerOptions: {
+    flex: 1,
+    padding: 12,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  containerTimer: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  time: {
+    color: '#FFF',
+  },
+
+  containerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  buttons: {
+    height: 64,
+    width: 64,
+    margin: 12,
+    borderRadius: 100,
+    elevation: 5,
+    alignItems: 'center',    
+    justifyContent: 'center',    
+    backgroundColor: '#555353',
+  },
+
+  center: {
+    height: 78,
+    width: 78,
+    marginHorizontal: 0,
+    marginBottom: 48,
   },
 });
