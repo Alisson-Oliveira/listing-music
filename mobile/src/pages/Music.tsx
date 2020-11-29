@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { StyleSheet, View, Text, Image, Dimensions } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
-import { _TIME, _COUNTER } from '../utils/utils';
+
+import { TIMER } from '../utils/timer';
 import { POINTER, POINTER_FULL } from '../utils/pointer';
 
 import { Feather } from '@expo/vector-icons';
@@ -12,8 +13,10 @@ import isEmputImage from '../images/is_empty_image.png';
 export default function Music() {
   const [playbackInstance, setPlaybackInstance] = useState<Audio.Sound>();
   const [playbackStatus, setPlaybackStatus] = useState<AVPlaybackStatus>();
+
   const [shouldPlay, setShouldPlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isCursor, setIsCursor] = useState(false);
 
   const [cursor, setCursor] = useState(0);
   const [pointer, setPointer] = useState(0);
@@ -50,7 +53,9 @@ export default function Music() {
 
     setPlaybackInstance(sound);
     setPlaybackStatus(status);
-  }
+
+    setIsCursor(true);
+  };
 
   const _onPlaybackStatusUpdate = (status: AVPlaybackStatus) => {
     if (status.isLoaded) {
@@ -65,8 +70,8 @@ export default function Music() {
         setPointerFull(responsePointerFull);
       }
 
-      const timerConvert = _TIME(status.positionMillis);
-      const updateCursor = POINTER_FULL(timerConvert); 
+      const timerConvert = TIMER(status.positionMillis);
+      const updateCursor = POINTER_FULL(timerConvert);
 
       setCursor(updateCursor);
       setTimer(timerConvert);
@@ -83,7 +88,7 @@ export default function Music() {
         if (isPlaying) {
           setIsPlaying(false);
           await playbackInstance.pauseAsync();
-        } else {
+        } else {        
           setIsPlaying(true);
           await playbackInstance.playAsync();
         }
@@ -93,7 +98,7 @@ export default function Music() {
     } catch (error) {
       console.log(`FATAL PLAYER ERROR: ${error}`);
     }
-  }
+  };
 
   async function stop() {
     try {
@@ -103,21 +108,43 @@ export default function Music() {
         setFullTimer('00:00:00');
         setTimer('00:00:00');
         setIsPlaying(false);
+        setIsCursor(false);
       }
     } catch (error) {
       // An error occurred!
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.containerMusic}>
         <Image source={isEmputImage} style={styles.image}/>
         <View style={styles.containerCounter}>
-          <View style={[styles.pointer, { 
-            left: -6 + (pointer / pointerFull) * cursor
-          }]}/>
-          <View style={styles.counter}/>
+          {
+            !isCursor ? (
+              <View style={styles.pointer} />
+            ) : (
+              <View style={[styles.pointer, { 
+                  left: (pointer / pointerFull) * cursor }]
+                }
+              />
+            ) 
+          }
+          {
+            !isCursor ? (
+              <View style={styles.counter}/>
+            ) : (
+              <>
+                <View style={styles.counter}/>
+                <View style={[styles.counter, {
+                    position: 'absolute',
+                    width: (pointer / pointerFull) * cursor, 
+                    borderColor: '#6F1898'}]
+                  }
+                />
+              </>
+            )
+          }
         </View>
       </View>
       <View style={styles.containerOptions}>
@@ -167,10 +194,11 @@ const styles = StyleSheet.create({
 
   containerCounter: {
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
 
   pointer: {
+    left: -6,
     width: 12,    
     height: 12,
     zIndex: 1,
